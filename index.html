@@ -17,6 +17,7 @@
         - Report Info: Tipos de Aprendizado -> Goal: Inform/Demonstrate -> Viz/Presentation: Detailed text + Interactive Code Examples -> Interaction: Button clicks reveal runnable code snippets for each learning type -> Justification: Integrates deep content with practical examples to bridge theory and practice, making abstract concepts concrete and testable for students. -> Library: None (HTML/Tailwind/JS).
         - Report Info: Pré-processamento -> Goal: Organize/Explain Process -> Viz/Presentation: HTML/CSS Flowchart and accordions -> Interaction: Hover to see details on flowchart, click to expand accordion sections -> Justification: The combination of a high-level visual overview with a detailed, collapsible text structure provides both quick understanding and in-depth exploration without cluttering the page -> Library: None (HTML/Tailwind/JS).
         - Report Info: Uso de Scikit-learn -> Goal: Demonstrate/Practice -> Viz/Presentation: Code examples with copy buttons -> Interaction: Click a button to display a runnable code block -> Justification: Provides practical, copy-paste examples for students to use in Google Colab, making the abstract concepts of classification and regression tangible and testable. -> Library: None (HTML/Tailwind/JS).
+        - Report Info: Interpretação de Resultados -> Goal: Explain Post-Modeling -> Viz/Presentation: Interactive accordions and textual summaries -> Interaction: Click to expand key metrics and interpretability methods (SHAP/LIME). -> Justification: Ensures students understand how to go beyond 'model building' to 'real-world application' by focusing on metrics and interpretability. -> Library: None (HTML/Tailwind/JS).
         - Report Info: Coleta de Dados -> Goal: Inform/Provide Resources -> Viz/Presentation: Grid of clickable cards -> Interaction: Click to open external links -> Justification: A clean, organized, and actionable way to present resources -> Library: None.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
@@ -115,6 +116,7 @@
                 <a href="#visualization" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Visualização</a>
                 <a href="#sklearn" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Scikit-learn</a>
                 <a href="#tensorflow" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">TensorFlow</a>
+                <a href="#interpretation" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Interpretação</a>
                 <a href="#project" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Projeto</a>
                 <a href="#quiz" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Quiz</a>
             </div>
@@ -127,6 +129,7 @@
                     <option value="#visualization">Visualização</option>
                     <option value="#sklearn">Scikit-learn</option>
                     <option value="#tensorflow">TensorFlow</option>
+                    <option value="#interpretation">Interpretação</option>
                     <option value="#project">Projeto</option>
                     <option value="#quiz">Quiz</option>
                 </select>
@@ -703,9 +706,92 @@
                 </div>
             </div>
         </section>
-        <!-- END NEW SECTION: TENSORFLOW -->
+        
+        <!-- NEW SECTION: INTERPRETAÇÃO DE RESULTADOS -->
+        <section id="interpretation" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-stone-800">Como Interpretar Resultados de Análise</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        A etapa crucial que transforma modelos preditivos em ações concretas: analisar métricas, entender a importância das variáveis e garantir a aplicabilidade dos resultados.
+                    </p>
+                </div>
 
-        <section id="project" class="py-20">
+                <div class="max-w-4xl mx-auto">
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>1. Métricas de Avaliação Essenciais</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">Para avaliar a performance do seu modelo, você precisa de métricas:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Acurácia:</strong> Proporção de previsões corretas (útil para classes balanceadas).</li>
+                                <li><strong>Precisão e Recall:</strong> Cruciais em cenários desbalanceados. A Precisão mede a qualidade dos positivos; o Recall, a completude.</li>
+                                <li><strong>F1-Score:</strong> Média harmônica entre Precisão e Recall.</li>
+                                <li><strong>Matriz de Confusão:</strong> Tabela detalhada que mostra os acertos (Verdadeiros Positivos/Negativos) e erros (Falsos Positivos/Negativos).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>2. Importância das Características e Interpretabilidade</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">Entender quais variáveis (features) movem a previsão é vital para a aplicabilidade:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Métodos In-built:</strong> Algoritmos como Random Forest e Gradient Boosting calculam essa importância nativamente.</li>
+                                <li><strong>SHAP e LIME:</strong> Técnicas avançadas (Model-agnostic) para explicar previsões de modelos complexos (como Redes Neurais), facilitando a comunicação com o público não técnico.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>3. Análise de Erros e Teoria de Bayes</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">Focar nos erros para aprimorar o modelo e usar teorias estatísticas:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Análise de Erros:</strong> Estudar onde o modelo falha (Falsos Positivos e Falsos Negativos) revela padrões de dados não capturados e indica a necessidade de mais dados ou features.</li>
+                                <li><strong>Teoria de Bayes:</strong> Fornece a base para entender como a probabilidade de uma hipótese é atualizada com base em novas evidências, relevante para modelos probabilísticos e gestão de incerteza.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>4. Relevância e Proposta de Intervenções</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">A interpretação só é útil se levar à ação:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Compreensão do Contexto:</strong> Sempre alinhe as métricas e a importância das features com o problema de negócio ou acadêmico real.</li>
+                                <li><strong>Intervenções Práticas:</strong> Use insights para propor soluções específicas. Se o modelo prevê risco de evasão, a intervenção pode ser tutoria, ajustes curriculares ou suporte psicológico, baseado nas variáveis de maior impacto.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-4">Recurso Adicional</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                        <a href="https://www.youtube.com/watch?v=6AC2Id_-ZHQ" target="_blank" class="flex items-center space-x-2 bg-white p-4 rounded-lg shadow-md hover:bg-stone-50 transition-colors">
+                            <img src="https://img.youtube.com/vi/6AC2Id_-ZHQ/hqdefault.jpg" alt="Video Thumbnail" class="w-24 h-auto rounded">
+                            <div class="text-left">
+                                <h4 class="font-semibold text-stone-800">INTERPRETAÇÃO DE RESULTADOS E TOMADA DE DECISÃO</h4>
+                                <p class="text-sm text-stone-600">Vídeo sobre como usar modelos preditivos para decisões reais.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- END NEW SECTION: INTERPRETAÇÃO DE RESULTADOS -->
+
+
+        <section id="project" class="py-20 bg-stone-100">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <h2 class="text-3xl font-bold text-stone-800">Coleta de Dados para o Projeto</h2>
@@ -1228,6 +1314,61 @@
                     ],
                     correct: 1,
                     explanation: 'A validação e análise de desempenho permitem que o modelo seja avaliado e ajustado para funcionar bem em novos dados.'
+                },
+                {
+                    question: 'Qual a principal finalidade da interpretação de resultados em modelos preditivos?',
+                    options: [
+                        'Avaliar a exatidão do código utilizado na implementação do modelo.',
+                        'Entender quais variáveis têm maior impacto nas previsões do modelo.',
+                        'Elaborar gráficos para a apresentação dos resultados ao público.',
+                        'Identificar se o modelo está superajustado aos dados de treinamento.'
+                    ],
+                    correct: 1,
+                    explanation: 'A interpretação de resultados visa compreender quais entradas influenciam mais as previsões do modelo, o que é essencial para ações práticas.'
+                },
+                {
+                    question: 'Qual é uma das métricas de avaliação utilizadas para verificar a performance de um modelo preditivo?',
+                    options: [
+                        'Precisão.',
+                        'Complexidade do Algoritmo.',
+                        'Tempo de Execução.',
+                        'Número de Variáveis.'
+                    ],
+                    correct: 0,
+                    explanation: 'A precisão mede a proporção de verdadeiros positivos entre todos os positivos preditos.'
+                },
+                {
+                    question: 'O que são técnicas como SHAP e LIME utilizadas para?',
+                    options: [
+                        'Criar gráficos de desempenho do modelo.',
+                        'Aumentar a complexidade dos modelos preditivos.',
+                        'Explicar previsões de modelos complexos de forma interpretável.',
+                        'Reduzir o tempo de treinamento dos modelos.'
+                    ],
+                    correct: 2,
+                    explanation: 'Ambas as técnicas ajudam a entender como diferentes variáveis influenciam as previsões do modelo.'
+                },
+                {
+                    question: 'O que a análise de erros proporciona na interpretação de modelos preditivos?',
+                    options: [
+                        'Revela onde o modelo falha e indica melhorias necessárias.',
+                        'Mostra apenas as previsões corretas do modelo.',
+                        'Ensina a fazer o ajuste fino de hiperparâmetros.',
+                        'Fornece dados adicionais para o modelo.'
+                    ],
+                    correct: 0,
+                    explanation: 'Compreender as falhas do modelo é essencial para aprimorar sua performance e a qualidade dos dados.'
+                },
+                {
+                    question: 'A teoria de Bayes é relevante na interpretação de resultados de que forma?',
+                    options: [
+                        'Ela ajuda a manter um registro dos dados utilizados no modelo.',
+                        'Permite atualizar a probabilidade de uma hipótese com base em novas evidências.',
+                        'Define um modelo específico de rede neural.',
+                        'Estabelece um critério fixo para avaliar todos os modelos preditivos.'
+                    ],
+                    correct: 1,
+                    explanation: 'A teoria de Bayes é fundamental para entender como novas informações influenciam a incerteza dos dados.'
                 }
             ];
 
