@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unidade 1: Técnicas de Machine Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals (Stone background, Teal/Orange accents) -->
+    <!-- Application Structure Plan: The single-page "Learning Path" structure is enhanced with a new "Fundamentals" section, placed after the introduction. This preserves the logical flow from broad concepts to specific techniques. The new section uses interactive accordions for key concepts to improve readability and reduce page length. The quiz is now interactive, providing immediate feedback. A sticky top navigation allows for non-linear exploration, enabling students to jump to specific sections. This design transforms a static outline into an engaging journey, promoting both guided learning and quick review. Key interactions include clickable cards to compare concepts and a simulated prediction to make abstract ideas tangible. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Fundamentos, Conceitos, Aplicações, Teorias -> Goal: Inform/Organize -> Viz/Presentation: Interactive accordions -> Interaction: Click to expand/collapse content sections -> Justification: Organizes a large amount of text in a clean, non-intrusive way, improving scannability and user focus -> Library: None (HTML/Tailwind/JS).
+        - Report Info: Quiz -> Goal: Assess understanding -> Viz/Presentation: Multiple-choice questions with feedback -> Interaction: Click a choice to see if it's correct -> Justification: Transforms a static quiz into a dynamic and engaging self-assessment tool -> Library: None (HTML/Tailwind/JS).
+        - Report Info: Tipos de Aprendizado -> Goal: Inform/Demonstrate -> Viz/Presentation: Detailed text + Interactive Code Examples -> Interaction: Button clicks reveal runnable code snippets for each learning type -> Justification: Integrates deep content with practical examples to bridge theory and practice, making abstract concepts concrete and testable for students. -> Library: None (HTML/Tailwind/JS).
+        - Report Info: Pré-processamento -> Goal: Organize/Explain Process -> Viz/Presentation: HTML/CSS Flowchart and accordions -> Interaction: Hover to see details on flowchart, click to expand accordion sections -> Justification: The combination of a high-level visual overview with a detailed, collapsible text structure provides both quick understanding and in-depth exploration without cluttering the page -> Library: None (HTML/Tailwind/JS).
+        - Report Info: Uso de Scikit-learn -> Goal: Demonstrate/Practice -> Viz/Presentation: Code examples with copy buttons -> Interaction: Click a button to display a runnable code block -> Justification: Provides practical, copy-paste examples for students to use in Google Colab, making the abstract concepts of classification and regression tangible and testable. -> Library: None (HTML/Tailwind/JS).
+        - Report Info: Coleta de Dados -> Goal: Inform/Provide Resources -> Viz/Presentation: Grid of clickable cards -> Interaction: Click to open external links -> Justification: A clean, organized, and actionable way to present resources -> Library: None.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #44403c;
+        }
+        .nav-link.active {
+            color: #0d9488;
+            font-weight: 700;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.flipped .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .accordion-item {
+            border-bottom: 1px solid #e7e5e4;
+        }
+        .accordion-button {
+            width: 100%;
+            text-align: left;
+            padding: 1.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #1c1917;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            padding-bottom: 0;
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 1000px;
+            padding-bottom: 1.5rem;
+        }
+        .quiz-option {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-stone-50/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-teal-700">ML - Unidade 1</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#intro" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Introdução</a>
+                <a href="#fundamentals" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Fundamentos</a>
+                <a href="#types" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Tipos de Aprendizado</a>
+                <a href="#preprocessing" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Pré-processamento</a>
+                <a href="#visualization" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Visualização</a>
+                <a href="#sklearn" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Scikit-learn</a>
+                <a href="#tensorflow" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">TensorFlow</a>
+                <a href="#project" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Projeto</a>
+                <a href="#quiz" class="nav-link text-stone-600 hover:text-teal-600 transition-colors">Quiz</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-stone-300 rounded-md px-3 py-2 text-stone-700">
+                    <option value="#intro">Introdução</option>
+                    <option value="#fundamentals">Fundamentos</option>
+                    <option value="#types">Tipos de Aprendizado</option>
+                    <option value="#preprocessing">Pré-processamento</option>
+                    <option value="#visualization">Visualização</option>
+                    <option value="#sklearn">Scikit-learn</option>
+                    <option value="#tensorflow">TensorFlow</option>
+                    <option value="#project">Projeto</option>
+                    <option value="#quiz">Quiz</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="py-20 md:py-32 bg-stone-100">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold text-stone-800 mb-4">Bem-vindos a Técnicas de Machine Learning</h2>
+                <p class="text-lg md:text-xl text-stone-600 max-w-3xl mx-auto">
+                    Neste primeiro encontro, vamos mergulhar nos conceitos fundamentais de Machine Learning, explorar suas incríveis aplicações no mundo real e entender o poder da análise preditiva para transformar dados em decisões inteligentes.
+                </p>
+            </div>
+        </section>
+        
+        <section id="fundamentals" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-stone-800">Fundamentos de Machine Learning</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        O campo da aprendizagem de máquina (Machine Learning - ML) tem se destacado como uma das áreas mais revolucionárias da ciência da computação e da inteligência artificial. Com o avanço das tecnologias e a explosão de dados disponíveis, o ML oferece ferramentas e técnicas para transformar dados brutos em informações valiosas, capazes de prever tendências, automatizar processos e oferecer insights profundos em diversas áreas do conhecimento. Este texto tem como objetivo apresentar os fundamentos de Machine Learning, explorando suas aplicações em diferentes contextos e oferecendo uma visão abrangente para alunos de graduação que buscam consolidar seu entendimento sobre o tema.
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>1. Conceitos de Machine Learning</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                Machine Learning é uma subárea da inteligência artificial que se concentra no desenvolvimento de algoritmos que permitem aos computadores aprenderem a partir de dados. A ideia central é que, em vez de programar explicitamente um computador para realizar uma tarefa, os algoritmos de ML permitem que ele identifique padrões e tome decisões com base em dados históricos. Existem três tipos principais de aprendizado em ML: supervisionado, não supervisionado e por reforço.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Aprendizado Supervisionado:</strong> Neste tipo de aprendizado, o algoritmo é treinado em um conjunto de dados rotulado, ou seja, cada entrada é associada a uma saída desejada. O objetivo é aprender uma função que mapeie entradas para saídas. Exemplos clássicos incluem regressão linear e classificação com árvores de decisão.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Aprendizado Não Supervisionado:</strong> Ao contrário do aprendizado supervisionado, os dados de entrada não são rotulados. O objetivo é encontrar padrões ou estruturas subjacentes nos dados. Técnicas comuns incluem agrupamento (clustering) e análise de componentes principais (PCA).
+                            </p>
+                            <p class="text-stone-700">
+                                <strong>Aprendizado por Reforço:</strong> Este é um tipo de aprendizado onde o algoritmo aprende a tomar decisões ao interagir com um ambiente. O aprendizado ocorre através de recompensas e punições, com o objetivo de maximizar uma função de recompensa cumulativa. Aplicações incluem jogos e robótica.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>2. Bibliotecas de Machine Learning</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">
+                                Para implementar técnicas de ML, existem várias bibliotecas populares que facilitam o desenvolvimento de modelos. Duas das mais utilizadas são <strong>Scikit-learn</strong> e <strong>TensorFlow</strong>.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Scikit-learn:</strong> É uma biblioteca de ML em Python que oferece ferramentas simples e eficientes para análise de dados e mineração. Ela é construída sobre NumPy, SciPy e matplotlib, e é amplamente utilizada para tarefas como classificação, regressão, clustering e redução de dimensionalidade.
+                            </p>
+                            <p class="text-stone-700">
+                                <strong>TensorFlow:</strong> Desenvolvido pelo Google Brain, é uma biblioteca de código aberto para computação numérica que facilita a construção de modelos de aprendizado profundo (deep learning). Com TensorFlow, é possível construir redes neurais complexas e treinar modelos em grandes volumes de dados.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>3. Aplicações de Machine Learning</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">
+                                O impacto do ML é vasto e suas aplicações se estendem por diversas áreas:
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Saúde:</strong> No diagnóstico médico, algoritmos de ML são usados para detectar doenças em estágios iniciais, como câncer, através da análise de imagens médicas.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Finanças:</strong> No setor financeiro, ML é empregado para prever tendências do mercado de ações, detectar fraudes e gerenciar riscos de crédito.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Educação:</strong> Em ambientes educacionais, ML pode ser utilizado para personalizar o aprendizado, prever o desempenho dos alunos e identificar aqueles que estão em risco de evasão.
+                            </p>
+                            <p class="text-stone-700">
+                                <strong>Varejo:</strong> No comércio, ML ajuda a prever o comportamento do consumidor, otimizar estoques e personalizar ofertas para clientes.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>4. Teorias e Conceitos Consagrados</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">
+                                O desenvolvimento de Machine Learning está enraizado em várias teorias e conceitos fundamentais, que incluem:
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Teorema de Bayes:</strong> Uma das bases do aprendizado estatístico, o teorema de Bayes oferece uma maneira de atualizar as probabilidades à medida que novas evidências são apresentadas.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Redes Neurais:</strong> Inspiradas no funcionamento do cérebro humano, as redes neurais são compostas por camadas de nós (neurônios artificiais) que processam dados de entrada e são fundamentais para o aprendizado profundo.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                <strong>Árvores de Decisão:</strong> Estruturas de decisão que utilizam um modelo de árvore para representar decisões e suas possíveis consequências, incluindo resultados de chance, custos de recursos e utilidades.
+                            </p>
+                            <p class="text-stone-700">
+                                <strong>Máquinas de Vetores de Suporte (SVM):</strong> Algoritmos de aprendizado supervisionado utilizados para classificação e regressão, que procuram um hiperplano no espaço de entrada que melhor separa as classes de dados.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="types" class="py-20 bg-stone-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-stone-800">Tipos de Aprendizado em Machine Learning</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">Os métodos de Machine Learning são classificados em três categorias principais, cada uma com características e aplicações distintas.</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <!-- Supervised Learning Section -->
+                    <div class="mb-12 p-8 bg-white rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <span class="text-4xl">🏷️</span>
+                            <h3 class="text-2xl font-bold text-teal-700 ml-4">Aprendizado Supervisionado</h3>
+                        </div>
+                        <p class="text-stone-700 mb-4">
+                            É o tipo mais comum, onde o modelo é treinado em um conjunto de dados rotulado, ou seja, cada exemplo de treinamento tem uma entrada e uma saída desejada.
+                        </p>
+                        <div class="grid md:grid-cols-2 gap-8 mb-6">
+                            <div>
+                                <h4 class="font-bold text-stone-800 mb-2">Conceitos Chave:</h4>
+                                <ul class="list-disc list-inside text-stone-600">
+                                    <li><strong class="text-stone-700">Regressão:</strong> Prever valores contínuos (ex: notas acadêmicas).</li>
+                                    <li><strong class="text-stone-700">Classificação:</strong> Prever categorias (ex: aprovação ou reprovação).</li>
+                                    <li><strong class="text-stone-700">Árvores de Decisão:</strong> Estruturas para dividir dados em subconjuntos.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-stone-800 mb-2">Exemplo Prático:</h4>
+                                <p class="text-stone-600">
+                                    Previsão de notas acadêmicas de alunos com base em dados demográficos e histórico escolar, utilizando um modelo de regressão linear.
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="showCode('supervised')" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-transform transform hover:scale-105">
+                            Ver Exemplo de Código
+                        </button>
+                    </div>
+
+                    <!-- Unsupervised Learning Section -->
+                    <div class="mb-12 p-8 bg-white rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <span class="text-4xl">🧩</span>
+                            <h3 class="text-2xl font-bold text-orange-600 ml-4">Aprendizado Não Supervisionado</h3>
+                        </div>
+                        <p class="text-stone-700 mb-4">
+                            Trabalha com dados sem rótulos. O objetivo é explorar a estrutura subjacente para descobrir padrões ou agrupamentos de forma autônoma.
+                        </p>
+                        <div class="grid md:grid-cols-2 gap-8 mb-6">
+                            <div>
+                                <h4 class="font-bold text-stone-800 mb-2">Conceitos Chave:</h4>
+                                <ul class="list-disc list-inside text-stone-600">
+                                    <li><strong class="text-stone-700">Agrupamento (Clustering):</strong> Identificar grupos de dados similares.</li>
+                                    <li><strong class="text-stone-700">Redução de Dimensionalidade:</strong> Simplificar conjuntos de dados complexos (ex: PCA).</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-stone-800 mb-2">Exemplo Prático:</h4>
+                                <p class="text-stone-600">
+                                    Segmentação de alunos em grupos com características de aprendizado semelhantes usando técnicas como K-means.
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="showCode('unsupervised')" class="bg-orange-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-700 transition-transform transform hover:scale-105">
+                            Ver Exemplo de Código
+                        </button>
+                    </div>
+
+                    <!-- Reinforcement Learning Section -->
+                    <div class="mb-12 p-8 bg-white rounded-lg shadow-md">
+                        <div class="flex items-center mb-4">
+                            <span class="text-4xl">🤖</span>
+                            <h3 class="text-2xl font-bold text-sky-600 ml-4">Aprendizado por Reforço</h3>
+                        </div>
+                        <p class="text-stone-700 mb-4">
+                            Uma abordagem onde um agente aprende a tomar decisões através de interações com o ambiente, recebendo recompensas ou penalidades.
+                        </p>
+                        <div class="grid md:grid-cols-2 gap-8 mb-6">
+                            <div>
+                                <h4 class="font-bold text-stone-800 mb-2">Conceitos Chave:</h4>
+                                <ul class="list-disc list-inside text-stone-600">
+                                    <li><strong class="text-stone-700">Q-Learning:</strong> Algoritmo para otimizar a função de valor da ação.</li>
+                                    <li><strong class="text-stone-700">Deep Reinforcement Learning:</strong> Combina aprendizado profundo com aprendizado por reforço.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-stone-800 mb-2">Exemplo Prático:</h4>
+                                <p class="text-stone-600">
+                                    Otimizar processos educacionais, como a personalização de currículos para maximizar o engajamento dos alunos.
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="showCode('reinforcement')" class="bg-sky-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-700 transition-transform transform hover:scale-105">
+                            Ver Exemplo de Código
+                        </button>
+                    </div>
+                </div>
+
+                <div id="code-block-container" class="mt-8 hidden max-w-4xl mx-auto bg-stone-800 rounded-lg p-6">
+                    <pre><code id="learning-code-example" class="text-sm text-white font-mono">O código será exibido aqui.</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="preprocessing" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-stone-800">Pré-processamento de Dados</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        O pré-processamento de dados é uma etapa crítica que prepara os dados brutos para análise, garantindo a qualidade e a precisão dos resultados em projetos de Machine Learning.
+                    </p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 mb-12">
+                    <div class="text-center p-6 bg-white rounded-lg shadow-md w-64">
+                        <h3 class="text-lg font-semibold text-stone-700">Dados Brutos</h3>
+                        <p class="text-4xl mt-2">🗂️</p>
+                        <p class="text-sm text-stone-500 mt-2">Dados como foram coletados, com possíveis erros e valores ausentes.</p>
+                    </div>
+                    <div class="text-4xl text-stone-400 font-light transform md:-translate-y-4">→</div>
+                     <div class="relative group text-center p-6 bg-white rounded-lg shadow-md w-64">
+                        <h3 class="text-lg font-semibold text-teal-700">Limpeza</h3>
+                        <p class="text-4xl mt-2">🧼</p>
+                        <div class="absolute bottom-full mb-2 w-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="bg-stone-800 text-white text-xs rounded py-1 px-2">Tratar valores ausentes e corrigir inconsistências.</div>
+                        </div>
+                    </div>
+                     <div class="text-4xl text-stone-400 font-light transform md:-translate-y-4">→</div>
+                     <div class="relative group text-center p-6 bg-white rounded-lg shadow-md w-64">
+                        <h3 class="text-lg font-semibold text-orange-600">Normalização</h3>
+                        <p class="text-4xl mt-2">⚖️</p>
+                         <div class="absolute bottom-full mb-2 w-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="bg-stone-800 text-white text-xs rounded py-1 px-2">Colocar todas as variáveis na mesma escala.</div>
+                        </div>
+                    </div>
+                    <div class="text-4xl text-stone-400 font-light transform md:-translate-y-4">→</div>
+                    <div class="text-center p-6 bg-teal-50 rounded-lg shadow-md w-64 border-2 border-teal-500">
+                        <h3 class="text-lg font-semibold text-stone-700">Dados Prontos</h3>
+                        <p class="text-sm text-stone-500 mt-2">Dados limpos e formatados, prontos para treinar o modelo.</p>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto mt-12">
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>1. Limpeza de Dados</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                A limpeza de dados é o processo de identificar e corrigir (ou remover) dados corruptos ou imprecisos de um conjunto de dados. Esta etapa é crucial para garantir a integridade dos dados, que frequentemente contêm inconsistências, valores ausentes e ruídos.
+                            </p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Identificação de dados ausentes:</strong> Tratar valores faltantes, que podem ocorrer devido a falhas na coleta, utilizando técnicas como a imputação (substituição por valores estimados).</li>
+                                <li><strong>Detecção de outliers:</strong> Identificar valores que se desviam significativamente dos outros dados, que podem distorcer a análise.</li>
+                                <li><strong>Remoção de duplicatas:</strong> Detectar e remover registros duplicados para evitar que certos dados tenham uma importância inflacionada.</li>
+                            </ul>
+                            <button onclick="showPreprocessingCode('cleaning')" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-transform transform hover:scale-105">
+                                Ver Exemplo de Código (Limpeza)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>2. Normalização e Escalonamento</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                A normalização ajusta os valores dos dados para que eles fiquem em um intervalo específico, garantindo que todas as features tenham a mesma influência no modelo, o que é vital para algoritmos baseados em distâncias.
+                            </p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Min-Max Scaling:</strong> Transforma os dados para que todos os valores fiquem entre 0 e 1.</li>
+                                <li><strong>Z-score Normalization:</strong> Ajusta os dados para que tenham média 0 e desvio padrão 1.</li>
+                            </ul>
+                            <button onclick="showPreprocessingCode('normalization')" class="bg-orange-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-700 transition-transform transform hover:scale-105">
+                                Ver Exemplo de Código (Normalização)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>3. Transformação e Redução de Dimensionalidade</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                A transformação envolve modificar os dados para torná-los adequados para análise, enquanto a redução de dimensionalidade visa diminuir o número de variáveis, mantendo a informação.
+                            </p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Codificação Categórica:</strong> Converte variáveis de texto em um formato numérico.</li>
+                                <li><strong>PCA (Análise de Componentes Principais):</strong> Técnica para reduzir o número de variáveis, melhorando a eficiência e evitando o overfitting.</li>
+                            </ul>
+                            <button onclick="showPreprocessingCode('transformation')" class="bg-sky-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-700 transition-transform transform hover:scale-105">
+                                Ver Exemplo de Código (Redução)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="preprocessing-code-container" class="mt-8 hidden max-w-4xl mx-auto bg-stone-800 rounded-lg p-6">
+                    <pre><code id="preprocessing-code-example" class="text-sm text-white font-mono">O código de exemplo de pré-processamento aparecerá aqui.</code></pre>
+                </div>
+                
+                <div class="mt-12 text-center">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-4">Para Aprofundar</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                        <a href="https://www.youtube.com/watch?v=bSbtfAVnfI4" target="_blank" class="flex items-center space-x-2 bg-white p-4 rounded-lg shadow-md hover:bg-stone-50 transition-colors">
+                            <img src="https://img.youtube.com/vi/bSbtfAVnfI4/hqdefault.jpg" alt="Video Thumbnail" class="w-24 h-auto rounded">
+                            <div class="text-left">
+                                <h4 class="font-semibold text-stone-800">Pré-Processamento dos Dados em Python</h4>
+                                <p class="text-sm text-stone-600">Vídeo sobre limpeza e normalização com código.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- NEW SECTION: VISUALIZAÇÃO DE DADOS -->
+        <section id="visualization" class="py-20 bg-stone-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-stone-800">Técnicas de Visualização de Dados</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        A visualização é fundamental para transformar dados brutos em insights compreensíveis, sendo crucial na etapa de Análise Exploratória de Dados (EDA) e na avaliação de modelos.
+                    </p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>1. Conceitos Fundamentais da Visualização</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">A visualização de dados deve sempre priorizar a eficácia na comunicação. Os conceitos essenciais incluem:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Precisão:</strong> A representação gráfica deve ser fiel aos dados para evitar interpretações equivocadas.</li>
+                                <li><strong>Clareza:</strong> Evitar elementos desnecessários que possam distrair ou confundir o observador.</li>
+                                <li><strong>Eficiência:</strong> Transmitir o máximo de informações com o mínimo de elementos gráficos.</li>
+                                <li><strong>Estética:</strong> Uma apresentação visualmente agradável aumenta o engajamento e a retenção.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>2. Principais Técnicas e Usos</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">A escolha do gráfico depende do tipo de análise que se deseja realizar:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Gráficos de Barras e Colunas:</strong> Para **comparar** valores entre diferentes categorias.</li>
+                                <li><strong>Gráficos de Linhas:</strong> Ideais para visualizar **séries temporais**, observando tendências ao longo do tempo.</li>
+                                <li><strong>Gráficos de Dispersão:</strong> Úteis para identificar **correlações** entre duas variáveis (Ex: Horas de estudo vs. Nota).</li>
+                                <li><strong>Heatmaps:</strong> Para visualizar a **magnitude** dos valores em uma matriz (comum para correlações em grandes datasets).</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>3. Relevância na Análise Preditiva (EDA)</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">A Análise Exploratória de Dados (EDA) é a fase onde a visualização é mais crítica:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Pré-modelagem:</strong> Ajuda a identificar dados ausentes, outliers e a estrutura dos dados, informando o pré-processamento.</li>
+                                <li><strong>Seleção de Features:</strong> Visualiza correlações e dependências que guiam a escolha das melhores variáveis para o modelo.</li>
+                                <li><strong>Pós-modelagem:</strong> Gráficos como Matrizes de Confusão e Curvas ROC avaliam a eficácia do modelo preditivo.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto mt-12">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-4 text-center">Exemplo Prático de EDA com Matplotlib</h3>
+                    <p class="text-center text-stone-600 mb-6">Este código demonstra como usar um Gráfico de Dispersão, uma técnica essencial para visualizar a correlação entre duas variáveis antes de construir um modelo de Regressão.</p>
+                    <button onclick="showVisualizationCode('eda_scatter')" class="block mx-auto bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-transform transform hover:scale-105">
+                        Ver Código de EDA (Gráfico de Dispersão)
+                    </button>
+                    <div id="visualization-code-container" class="mt-8 hidden max-w-full mx-auto bg-stone-800 rounded-lg p-6">
+                        <pre><code id="visualization-code-example" class="text-sm text-white font-mono">O código de visualização aparecerá aqui.</code></pre>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <h3 class="text-2xl font-bold text-stone-800 mb-4">Recurso Adicional</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                        <a href="http://youtube.com/watch?v=vbONUXxeKR0" target="_blank" class="flex items-center space-x-2 bg-white p-4 rounded-lg shadow-md hover:bg-stone-50 transition-colors">
+                            <img src="https://img.youtube.com/vi/vbONUXxeKR0/hqdefault.jpg" alt="Video Thumbnail" class="w-24 h-auto rounded">
+                            <div class="text-left">
+                                <h4 class="font-semibold text-stone-800">A forma mais ATRATIVA de colocar seu modelo de Machine Learning em PRODUÇÃO</h4>
+                                <p class="text-sm text-stone-600">Vídeo sobre a importância da visualização na etapa final (produção) de um modelo.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- END NEW SECTION: VISUALIZAÇÃO DE DADOS -->
+
+        <section id="sklearn" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-stone-800">Introdução e Uso do Scikit-learn</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        O Scikit-learn é a principal biblioteca de Python para Machine Learning, oferecendo ferramentas simples e eficientes para análise de dados e implementação de modelos.
+                    </p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>1. O que é Scikit-learn?</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                O Scikit-learn é uma biblioteca de Machine Learning em Python construída sobre o NumPy, SciPy e Matplotlib. É amplamente reconhecida por sua facilidade de uso, documentação abrangente e suporte a uma vasta gama de algoritmos de aprendizado supervisionado e não supervisionado.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>2. Estrutura e Funcionalidades Chave</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">A biblioteca é modular e oferece:</p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Algoritmos de Classificação:</strong> Regressão logística, SVM, Árvores de Decisão.</li>
+                                <li><strong>Algoritmos de Regressão:</strong> Regressão Linear, Ridge, LASSO.</li>
+                                <li><strong>Agrupamento (Clustering):</strong> K-Means, DBSCAN.</li>
+                                <li><strong>Redução de Dimensionalidade:</strong> PCA, t-SNE.</li>
+                                <li><strong>Pré-processamento:</strong> Normalização, Padronização e Codificação.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>3. Documentação e Exemplos de Implementação</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                A documentação do Scikit-learn é um recurso de aprendizado fundamental. Ela oferece tutoriais detalhados, exemplos de código para cada algoritmo e explicações teóricas.
+                            </p>
+                            <p class="text-stone-700 mb-2">
+                                Para praticar, a documentação ilustra o fluxo básico de ML, como no exemplo de classificação de flores Iris, que inclui:
+                                <ul>
+                                    <li>Carregamento de dados (<code>load_iris</code>)</li>
+                                    <li>Divisão em treino e teste (<code>train_test_split</code>)</li>
+                                    <li>Criação e treinamento do modelo (<code>RandomForestClassifier</code>)</li>
+                                    <li>Previsão e avaliação (<code>accuracy_score</code>)</li>
+                                </ul>
+                            </p>
+                            <a href="https://scikit-learn.org/stable/documentation.html" target="_blank" class="text-teal-600 hover:text-teal-700 font-semibold mt-2 inline-block">
+                                Explore a Documentação Oficial do Scikit-learn »
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-12 mb-8">
+                    <h3 class="text-2xl font-bold text-stone-800">Exemplos Práticos para Colab</h3>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        Utilize os exemplos abaixo para testar fluxos de ML de classificação e regressão diretamente no Google Colab.
+                    </p>
+                </div>
+
+                <div class="flex justify-center space-x-4 mb-8">
+                    <button id="classification-btn" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-colors">
+                        Exemplo de Classificação
+                    </button>
+                    <button id="regression-btn" class="bg-orange-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-orange-700 transition-colors">
+                        Exemplo de Regressão
+                    </button>
+                </div>
+                <div class="max-w-4xl mx-auto bg-stone-800 rounded-lg p-6">
+                    <pre><code id="code-example-block" class="text-sm text-white font-mono">Clique em um dos botões acima para ver um exemplo de código.</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- NEW SECTION: TENSORFLOW -->
+        <section id="tensorflow" class="py-20 bg-stone-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-stone-800">Explorando o TensorFlow</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        O TensorFlow é uma das bibliotecas mais poderosas para Deep Learning e análise preditiva complexa, sendo essencial para construir e treinar redes neurais.
+                    </p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>1. O que é e Estrutura (Tensores e Grafos)</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-4">
+                                **TensorFlow** é uma biblioteca de código aberto para computação numérica e aprendizado de máquina, desenvolvida pelo Google Brain. Ela utiliza **grafos de fluxo de dados** para realizar cálculos complexos, permitindo a construção eficiente de modelos de **Deep Learning**.
+                            </p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Tensores:</strong> A estrutura de dados central, representando arrays multidimensionais que fluem pelas operações.</li>
+                                <li><strong>Grafo de Computação:</strong> Estrutura de nós (operações matemáticas) e arestas (tensores), que permite ao TensorFlow otimizar o uso de recursos, como GPUs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>2. Documentação e Referência de API</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="text-stone-700 mb-2">
+                                A documentação oficial é crucial para iniciantes e usuários avançados, cobrindo desde a instalação até tutoriais complexos.
+                            </p>
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Guia de Início Rápido:</strong> Visão geral das funcionalidades básicas.</li>
+                                <li><strong>Tutoriais:</strong> Exemplos práticos de como construir modelos de aprendizado de máquina.</li>
+                                <li><strong>API Reference:</strong> Detalhes sobre a sintaxe, funções e classes disponíveis (ex: <code>tf.keras.layers.Dense</code>).</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button">
+                            <span>3. Conceitos e Ferramentas Fundamentais</span>
+                            <span class="text-2xl transform transition-transform duration-300">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <ul class="list-disc list-inside text-stone-600 mb-4">
+                                <li><strong>Keras:</strong> API de alto nível, integrada ao TensorFlow, que facilita a construção e o treinamento de modelos (sequenciais e funcionais).</li>
+                                <li><strong>Eager Execution:</strong> Permite a execução imediata das operações, simplificando o desenvolvimento e a depuração.</li>
+                                <li><strong>Modelos:</strong> São as estruturas de aprendizado criadas (ex: <code>tf.keras.Sequential</code>)</li>
+                                <li><strong>Sessões:</strong> Usadas para executar operações no grafo (uso simplificado na versão 2.x).</li>
+                            </ul>
+                            <a href="https://www.youtube.com/watch?v=niqthpSsQJc" target="_blank" class="flex items-center space-x-2 bg-stone-50 p-3 rounded-lg shadow-inner hover:bg-stone-100 transition-colors text-stone-800">
+                                <span>▶️ Construindo Modelos de Machine Learning com TensorFlow (Vídeo)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-12 mb-8">
+                    <h3 class="text-2xl font-bold text-stone-800">Tutorial Prático: Regressão Linear Simples</h3>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">
+                        Este exemplo básico demonstra o fluxo de trabalho do TensorFlow para prever o desempenho acadêmico (nota) com base nas horas de estudo.
+                    </p>
+                </div>
+
+                <div class="flex justify-center space-x-4 mb-8">
+                    <button id="tensorflow-regression-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Ver Código (Regressão no Colab)
+                    </button>
+                </div>
+                <div class="max-w-4xl mx-auto bg-stone-800 rounded-lg p-6">
+                    <pre><code id="tensorflow-code-example-block" class="text-sm text-white font-mono">Clique no botão acima para ver o tutorial básico de Regressão Linear com TensorFlow.</code></pre>
+                </div>
+            </div>
+        </section>
+        <!-- END NEW SECTION: TENSORFLOW -->
+
+        <section id="project" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-stone-800">Coleta de Dados para o Projeto</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">Todo projeto de Machine Learning começa com dados. Aqui estão algumas fontes excelentes para encontrar conjuntos de dados para o seu projeto.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <a href="https://www.kaggle.com/datasets" target="_blank" class="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow transform hover:-translate-y-1">
+                        <h3 class="text-xl font-bold text-sky-700">Kaggle Datasets</h3>
+                        <p class="text-stone-600 mt-2">O maior repositório de datasets públicos, com competições e notebooks para inspiração.</p>
+                    </a>
+                    <a href="https://archive.ics.uci.edu/ml/index.php" target="_blank" class="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow transform hover:-translate-y-1">
+                        <h3 class="text-xl font-bold text-orange-700">UCI ML Repository</h3>
+                        <p class="text-stone-600 mt-2">Uma coleção clássica e acadêmica de conjuntos de dados usados em muitas pesquisas de ML.</p>
+                    </a>
+                    <a href="https://datasetsearch.research.google.com/" target="_blank" class="block p-8 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow transform hover:-translate-y-1">
+                        <h3 class="text-xl font-bold text-teal-700">Google Dataset Search</h3>
+                        <p class="text-stone-600 mt-2">Uma ferramenta de busca que ajuda a encontrar conjuntos de dados hospedados em milhares de repositórios na web.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="quiz" class="py-20 bg-stone-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-stone-800">Quiz de Fundamentos</h2>
+                    <p class="text-lg text-stone-600 mt-2 max-w-2xl mx-auto">Teste seu conhecimento sobre os conceitos básicos de Machine Learning que acabamos de explorar!</p>
+                </div>
+                <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                    <div id="quiz-container"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-stone-800 text-stone-300 py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 - Disciplina de Técnicas de Machine Learning</p>
+            <p class="text-sm text-stone-400 mt-2">Uma Aplicação Interativa para a Unidade 1</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.6
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                        mobileNav.value = `#${id}`;
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            mobileNav.addEventListener('change', (e) => {
+                window.location.href = e.target.value;
+            });
+
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const item = button.parentElement;
+                    const content = button.nextElementSibling;
+                    item.classList.toggle('active');
+                    if (item.classList.contains('active')) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        button.querySelector('span:last-child').textContent = '−';
+                    } else {
+                        content.style.maxHeight = '0';
+                        button.querySelector('span:last-child').textContent = '+';
+                    }
+                });
+            });
+
+            const quizData = [
+                {
+                    question: 'Qual é o objetivo principal do Machine Learning?',
+                    options: [
+                        'Programar computadores para realizar tarefas específicas.',
+                        'Identificar padrões e tomar decisões com base em dados históricos.',
+                        'Substituir o trabalho humano em todas as áreas.',
+                        'Criar novas linguagens de programação.'
+                    ],
+                    correct: 1,
+                    explanation: 'O objetivo central do Machine Learning é permitir que algoritmos aprendam e identifiquem padrões a partir de dados.'
+                },
+                {
+                    question: 'Quais são os três tipos principais de aprendizado em Machine Learning?',
+                    options: [
+                        'Supervisionado, não supervisionado, por reforço.',
+                        'Ativo, passivo, semi-supervisionado.',
+                        'Determinístico, estocástico, adaptativo.',
+                        'Linear, não linear e complexa.'
+                    ],
+                    correct: 0,
+                    explanation: 'Esses são os três tipos principais de aprendizado em Machine Learning.'
+                },
+                {
+                    question: 'Qual biblioteca é conhecida por facilitar a construção de modelos de aprendizado profundo?',
+                    options: [
+                        'Scikit-learn.',
+                        'TensorFlow.',
+                        'Matplotlib.',
+                        'Pandas.'
+                    ],
+                    correct: 1,
+                    explanation: 'TensorFlow é uma biblioteca amplamente utilizada para construir modelos de aprendizado profundo.'
+                },
+                {
+                    question: 'Qual é a função do pré-processamento de dados em Machine Learning?',
+                    options: [
+                        'Remover todos os dados irrelevantes.',
+                        'Limpar e normalizar os dados para melhorar o desempenho dos modelos.',
+                        'Transformar dados em texto.',
+                        'Criar novos dados a partir dos dados existentes.'
+                    ],
+                    correct: 1,
+                    explanation: 'O pré-processamento inclui limpeza e normalização para garantir conjuntos de dados de melhor qualidade.'
+                },
+                {
+                    question: 'Em qual área Machine Learning pode ser aplicado?',
+                    options: [
+                        'Apenas em tecnologias da informação.',
+                        'Saúde, finanças, educação e varejo.',
+                        'Somente em jogos e entretenimento.',
+                        'Apenas em operações industriais.'
+                    ],
+                    correct: 1,
+                    explanation: 'Machine Learning tem um amplo espectro de aplicações em várias áreas, incluindo as mencionadas.'
+                },
+                {
+                    question: 'Qual é a principal característica do aprendizado supervisionado em Machine Learning?',
+                    options: [
+                        'Os dados não possuem rótulos ou categorias específicas.',
+                        'O modelo é treinado com um conjunto de dados rotulado.',
+                        'Não há interação com o ambiente durante o aprendizado.',
+                        'Os modelos não aprendem padrões, apenas replicam dados.'
+                    ],
+                    correct: 1,
+                    explanation: 'O aprendizado supervisionado envolve o treinamento de um modelo com dados rotulados para mapear entradas para saídas.'
+                },
+                {
+                    question: 'Qual técnica é utilizada no aprendizado não supervisionado para identificar grupos de dados similares?',
+                    options: [
+                        'Regressão Linear.',
+                        'Classificação.',
+                        'Agrupamento (Clustering).',
+                        'Normalização de Dados.'
+                    ],
+                    correct: 2,
+                    explanation: 'O agrupamento é uma técnica chave no aprendizado não supervisionado para descobrir padrões em dados não rotulados.'
+                },
+                {
+                    question: 'O que caracteriza o aprendizado por reforço?',
+                    options: [
+                        'Aprendizado a partir de dados rotulados com um supervisor.',
+                        'Interação com o ambiente e aprendizado baseado em recompensas.',
+                        'Uso de grandes conjuntos de dados não rotulados.',
+                        'Predição de um valor contínuo.'
+                    ],
+                    correct: 1,
+                    explanation: 'O aprendizado por reforço envolve um agente que interage com o ambiente, recebendo feedback na forma de recompensas ou punições.'
+                },
+                {
+                    question: 'Qual técnica é comum em aprendizado supervisionado para prever notas acadêmicas?',
+                    options: [
+                        'K-means.',
+                        'Regressão Linear.',
+                        'PCA (Análise de Componentes Principais).',
+                        'Q-Learning.'
+                    ],
+                    correct: 1,
+                    explanation: 'A regressão linear é frequentemente utilizada para prever notas acadêmicas com base em dados históricos.'
+                },
+                {
+                    question: 'Qual é uma das etapas recomendadas para a preparação de dados em um projeto de Machine Learning?',
+                    options: [
+                        'Utilizar dados não verificados.',
+                        'Normalização de Dados.',
+                        'Apenas coletar dados sem limpeza.',
+                        'Ignorar a validação do modelo.'
+                    ],
+                    correct: 1,
+                    explanation: 'A normalização é uma etapa importante para garantir que as características tenham a mesma influência no modelo.'
+                },
+                {
+                    question: 'Qual é a principal intenção do pré-processamento de dados em projetos de Machine Learning?',
+                    options: [
+                        'Remover dados desnecessários do conjunto de dados.',
+                        'Factorear os dados para melhorar sua aparência.',
+                        'Preparar dados brutos para que sejam analisados corretamente.',
+                        'Aumentar o número de variáveis no conjunto de dados.'
+                    ],
+                    correct: 2,
+                    explanation: 'O pré-processamento tem como intenção preparar os dados para que possam ser utilizados de forma eficaz em modelos de Machine Learning.'
+                },
+                {
+                    question: 'Qual é uma técnica comum utilizada na limpeza de dados?',
+                    options: [
+                        'Normalização de dados.',
+                        'Imputação de dados ausentes.',
+                        'Redução de dimensionalidade.',
+                        'Codificação de variáveis categóricas.'
+                    ],
+                    correct: 1,
+                    explanation: 'A imputação é uma técnica utilizada para substituir valores ausentes por estimativas, sendo uma parte importante do processo de limpeza de dados.'
+                },
+                {
+                    question: 'Qual é a razão para se realizar a normalização de dados?',
+                    options: [
+                        'Para aumentar a quantidade de dados brutos.',
+                        'Para fazer com que os dados fiquem em uma faixa específica.',
+                        'Para remover outliers do conjunto de dados.',
+                        'Para transformar dados em texto legível.'
+                    ],
+                    correct: 1,
+                    explanation: 'A normalização ajusta os valores dos dados para ficarem em um intervalo específico, facilitando a análise.'
+                },
+                {
+                    question: 'Qual a melhor prática para a documentação durante o pré-processamento?',
+                    options: [
+                        'Registrar as etapas de transformações realizadas.',
+                        'Evitar anotações para não convolar o processo.',
+                        'Manter os dados em formato brutos sem modificações.',
+                        'Limitar a documentação para apenas resultados finais.'
+                    ],
+                    correct: 0,
+                    explanation: 'Documentar as etapas realizadas no pré-processamento é essencial para garantir a reprodutibilidade e facilitar colaborações futuras.'
+                },
+                {
+                    question: 'O que caracteriza a detecção de outliers?',
+                    options: [
+                        'A identificação de valores que são inexpressivos para a análise.',
+                        'A verificação de dados ausentes no conjunto de dados.',
+                        'Valores que se desviam significativamente dos outros dados no conjunto.',
+                        'A normalização de cada dado para a mesma escala.'
+                    ],
+                    correct: 2,
+                    explanation: 'Outliers são exatamente definidos como valores que se distanciam substancialmente do resto dos dados, podendo afetar a análise.'
+                },
+                {
+                    question: 'Qual a principal finalidade da biblioteca Scikit-learn?',
+                    options: [
+                        'Desenvolver interfaces gráficas para aplicativos.',
+                        'Realizar tarefas de aprendizado de máquina de forma simples e eficiente.',
+                        'Gerar gráficos e visualizações de dados interativos.',
+                        'Armazenar grandes quantidades de dados de forma eficiente.'
+                    ],
+                    correct: 1,
+                    explanation: 'A Scikit-learn é projetada especificamente para facilitar a implementação de técnicas de aprendizado de máquina, incluindo classificação, regressão e agrupamento.'
+                },
+                {
+                    question: 'Quais dos seguintes métodos são categorias de algoritmos disponíveis no Scikit-learn?',
+                    options: [
+                        'Análise de Sentimentos e Processamento de Linguagem Natural.',
+                        'Algoritmos de Classificação, Regressão e Agrupamento.',
+                        'Redução de Dados e Gerenciamento de Banco de Dados.',
+                        'Visualização de Dados e Análises Estatísticas.'
+                    ],
+                    correct: 1,
+                    explanation: 'Classificação, Regressão e Agrupamento (Clustering) são as principais famílias de algoritmos que o Scikit-learn oferece.'
+                },
+                {
+                    question: 'O que é a documentação do Scikit-learn?',
+                    options: [
+                        'Um guia de instalação para bibliotecas de dados.',
+                        'Um recurso que fornece tutoriais, exemplos e explicações sobre algoritmos.',
+                        'Um manual de correção de erros do Python.',
+                        'Uma plataforma de ensino online.'
+                    ],
+                    correct: 1,
+                    explanation: 'A documentação é um recurso essencial para aprender a usar a biblioteca, fornecendo tutoriais e referências detalhadas dos algoritmos.'
+                },
+                {
+                    question: 'Qual é a sequência correta das etapas para aplicar Machine Learning com Scikit-learn?',
+                    options: [
+                        'Coleta de Dados, Normalização, Modelo, Avaliação.',
+                        'Coleta de Dados, Pré-processamento, Criação de Modelo, Avaliação.',
+                        'Criação de Modelo, Coleta de Dados, Avaliação, Pré-processamento.',
+                        'Avaliação, Criação de Modelo, Coleta de Dados, Pré-processamento.'
+                    ],
+                    correct: 1,
+                    explanation: 'A sequência ideal começa com a coleta, seguida pela preparação dos dados (pré-processamento), o treinamento do modelo e, finalmente, a avaliação de seu desempenho.'
+                },
+                {
+                    question: 'Para que serve a função train_test_split do Scikit-learn?',
+                    options: [
+                        'Dividir dados em conjuntos de treinamento e teste.',
+                        'Treinar um modelo de aprendizado de máquina.',
+                        'Normalizar os dados para melhorar a precisão do modelo.',
+                        'Criar visualizações dos dados.'
+                    ],
+                    correct: 0,
+                    explanation: 'O train_test_split é crucial para separar o conjunto de dados em dados de treino (para o modelo aprender) e dados de teste (para avaliar o desempenho do modelo em dados não vistos).'
+                },
+                {
+                    question: 'Qual é o objetivo principal da coleta de dados em projetos acadêmicos, segundo o texto?',
+                    options: [
+                        'Reunir informações para análise posterior.',
+                        'Criar um banco de dados para armazenamento.',
+                        'Treinar modelos de Machine Learning automaticamente.',
+                        'Publicar dados em fontes abertas.'
+                    ],
+                    correct: 0,
+                    explanation: 'O principal objetivo da coleta de dados é reunir informações que serão analisadas para gerar insights e tomar decisões.'
+                },
+                {
+                    question: 'Quais são algumas fontes de dados públicas mencionadas no texto?',
+                    options: [
+                        'Relatórios de desempenho de alunos e portais de dados abertos.',
+                        'Aplicativos de controle de notas e redes sociais.',
+                        'Livros didáticos e artigos comerciais.',
+                        'Informações coletadas por alunos em suas redes pessoais.'
+                    ],
+                    correct: 0,
+                    explanation: 'O texto menciona portais de dados abertos (que pode incluir relatórios de desempenho) e outras fontes de pesquisa como repositórios de pesquisa e publicações acadêmicas.'
+                },
+                {
+                    question: 'Qual passo é parte do pré-processamento de dados?',
+                    options: [
+                        'Limpeza de dados.',
+                        'Coleta de novos dados.',
+                        'Definição do problema a ser resolvido.',
+                        'Publicação dos resultados.'
+                    ],
+                    correct: 0,
+                    explanation: 'A limpeza de dados é uma etapa crítica do pré-processamento, onde valores ausentes ou inconsistentes são removidos.'
+                },
+                {
+                    question: 'O que deve ser validado durante a coleta de dados, segundo o texto?',
+                    options: [
+                        'As fontes de dados públicas.',
+                        'Os dados coletados dos alunos.',
+                        'Os métodos de ensino utilizados pelos professores.',
+                        'O conteúdo curricular da instituição.'
+                    ],
+                    correct: 0,
+                    explanation: 'É importante validar a confiabilidade e a atualidade das fontes de dados públicas antes de usá-las.'
+                },
+                {
+                    question: 'Qual é uma das dicas fornecidas para a coleta e preparação de dados?',
+                    options: [
+                        'Documente o processo de coleta e preparação de dados.',
+                        'Apenas use dados antigos para a análise.',
+                        'Evite a normalização dos dados coletados.',
+                        'Utilize ferramentas de automação apenas quando necessário.'
+                    ],
+                    correct: 0,
+                    explanation: 'Documentar todas as etapas é crucial para a replicabilidade e validação dos resultados.'
+                },
+                {
+                    question: 'Qual é o principal objetivo da visualização de dados?',
+                    options: [
+                        'Armazenar dados em formatos compactos.',
+                        'Facilitar a interpretação de padrões complexos.',
+                        'Realizar o pré-processamento de dados automaticamente.',
+                        'Acelerar o processo de treinamento de modelos.'
+                    ],
+                    correct: 1,
+                    explanation: 'A visualização de dados busca transformar informações complexas em representações gráficas facilmente compreensíveis.'
+                },
+                {
+                    question: 'Qual tipo de gráfico é ideal para visualizar tendências e padrões ao longo do tempo (séries temporais)?',
+                    options: [
+                        'Gráfico de Dispersão.',
+                        'Histograma.',
+                        'Gráfico de Linhas.',
+                        'Heatmap.'
+                    ],
+                    correct: 2,
+                    explanation: 'O Gráfico de Linhas é o mais adequado para séries temporais, pois conecta pontos de dados em intervalos contínuos.'
+                },
+                {
+                    question: 'Qual é a principal função da visualização de dados na Análise Exploratória de Dados (EDA)?',
+                    options: [
+                        'Ajustar os hiperparâmetros do modelo.',
+                        'Construir a matriz de confusão final.',
+                        'Entender a estrutura dos dados, identificar padrões e outliers.',
+                        'Realizar a codificação One-Hot Encoding.'
+                    ],
+                    correct: 2,
+                    explanation: 'A EDA utiliza a visualização para entender as características, distribuições e a qualidade geral do conjunto de dados antes da modelagem.'
+                },
+                {
+                    question: 'Segundo o conceito de Clareza na visualização, o que deve ser evitado?',
+                    options: [
+                        'O uso de cores vibrantes.',
+                        'A inclusão de elementos desnecessários que distraem.',
+                        'O uso de eixos numerados.',
+                        'A documentação das fontes de dados.'
+                    ],
+                    correct: 1,
+                    explanation: 'A clareza exige a remoção de "chart junk" ou elementos que não agregam valor à informação, evitando a distração do observador.'
+                },
+                {
+                    question: 'Qual é a principal função da visualização de dados, segundo Edward Tufte?',
+                    options: [
+                        'Revelar padrões, tendências e outliers nos dados.',
+                        'Criar gráficos bonitos para atrair a atenção do público.',
+                        'Facilitar a manipulação de dados em tabelas.',
+                        'Armazenar dados de forma eficiente.'
+                    ],
+                    correct: 0,
+                    explanation: 'Tufte enfatiza que a visualização de dados deve mostrar padrões complexos de forma clara e eficaz, revelando padrões, tendências e outliers.'
+                },
+                {
+                    question: 'Qual das seguintes opções é uma característica fundamental da visualização de dados?',
+                    options: [
+                        'Estética.',
+                        'Complexidade.',
+                        'Desinformação.',
+                        'Ambiguidade.'
+                    ],
+                    correct: 0,
+                    explanation: 'Embora a estética não deva comprometer a precisão, ela é uma característica que pode aumentar o engajamento e a retenção de informações.'
+                },
+                {
+                    question: 'Quais gráficos são mais apropriados para visualizar séries temporais?',
+                    options: [
+                        'Gráficos de barras.',
+                        'Gráficos de linhas.',
+                        'Heatmaps.',
+                        'Histogramas.'
+                    ],
+                    correct: 1,
+                    explanation: 'Gráficos de linhas são ideais para visualizar séries temporais e identificar tendências ao longo do tempo.'
+                },
+                {
+                    question: 'O que a visualização de dados ajuda a identificar durante a Análise Exploratória de Dados (EDA)?',
+                    options: [
+                        'Aumentar a quantidade de dados disponíveis.',
+                        'A qualidade dos dados.',
+                        'A definir algoritmos de machine learning.',
+                        'Marketing e vendas.'
+                    ],
+                    correct: 1,
+                    explanation: 'A visualização de dados ajuda a identificar dados ausentes, outliers e erros que podem afetar o modelo, o que está relacionado à qualidade dos dados.'
+                },
+                {
+                    question: 'Para que os gráficos, como curvas ROC e matrizes de confusão, são utilizados na análise preditiva?',
+                    options: [
+                        'Para prever novos dados.',
+                        'Para identificar erros nos dados.',
+                        'Para avaliar o desempenho de um modelo preditivo.',
+                        'Para criar representações estéticas dos dados.'
+                    ],
+                    correct: 2,
+                    explanation: 'Gráficos como curvas ROC e matrizes de confusão são essenciais para avaliar a eficácia de modelos preditivos após o treinamento.'
+                },
+                {
+                    question: 'O que é o TensorFlow?',
+                    options: [
+                        'Uma biblioteca para edição de imagens.',
+                        'Uma plataforma de código aberto para aprendizado de máquina.',
+                        'Um sistema operacional para dispositivos móveis.',
+                        'Um software de banco de dados.'
+                    ],
+                    correct: 1,
+                    explanation: 'O TensorFlow é uma plataforma de código aberto desenvolvida pelo Google Brain Team, projetada para facilitar a construção de modelos de aprendizado de máquina.'
+                },
+                {
+                    question: 'Quais são componentes do TensorFlow?',
+                    options: [
+                        'TensorFlow Lite, TensorFlow.js, TensorFlow Extended e Keras.',
+                        'Python, Keras, R e Excel.',
+                        'Tensores, gráficos e algoritmos de SQL.',
+                        'Sistemas de gerenciamento de conteúdo, gerenciamento de projeto e ferramentas de design gráfico.'
+                    ],
+                    correct: 0,
+                    explanation: 'Esses são todos componentes importantes do TensorFlow, oferecendo diferentes funcionalidades para a criação e implementação de modelos de aprendizado de máquina.'
+                },
+                {
+                    question: 'Qual é a estrutura de dados central do TensorFlow?',
+                    options: [
+                        'Arrays unidimensionais.',
+                        'Tensores.',
+                        'Listas estáticas.',
+                        'Objetos JSON.'
+                    ],
+                    correct: 1,
+                    explanation: 'Tensores são a estrutura de dados central do TensorFlow, permitindo representar dados em várias dimensões.'
+                },
+                {
+                    question: 'Qual é o primeiro passo para começar a usar o TensorFlow?',
+                    options: [
+                        'Executar um modelo complexo.',
+                        'Instalar o TensorFlow com pip.',
+                        'Criar um arquivo de texto vazio.',
+                        'Aprender linguagens de programação complexas.'
+                    ],
+                    correct: 1,
+                    explanation: 'O primeiro passo para usar o TensorFlow é instalá-lo utilizando o comando pip.'
+                },
+                {
+                    question: 'Por que a validação e análise de desempenho são importantes em modelos preditivos?',
+                    options: [
+                        'Elas ajudam a identificar erros no código.',
+                        'Elas garantem que o modelo seja eficaz e generalizável.',
+                        'Elas são desnecessárias para modelos simples.',
+                        'Elas aumentam o tempo de computação.'
+                    ],
+                    correct: 1,
+                    explanation: 'A validação e análise de desempenho permitem que o modelo seja avaliado e ajustado para funcionar bem em novos dados.'
+                }
+            ];
+
+            const quizContainer = document.getElementById('quiz-container');
+
+            function buildQuiz() {
+                quizData.forEach((q, index) => {
+                    const questionElement = document.createElement('div');
+                    questionElement.classList.add('mb-8');
+                    questionElement.innerHTML = `<p class="font-semibold text-lg mb-4 text-stone-800">${index + 1}. ${q.question}</p>`;
+                    
+                    q.options.forEach((option, i) => {
+                        const optionElement = document.createElement('div');
+                        optionElement.classList.add('quiz-option', 'p-4', 'mb-2', 'rounded-lg', 'border', 'border-stone-200', 'hover:bg-stone-50', 'text-stone-700');
+                        optionElement.textContent = option;
+                        optionElement.dataset.index = i;
+                        optionElement.addEventListener('click', () => checkAnswer(optionElement, i, q));
+                        questionElement.appendChild(optionElement);
+                    });
+                    
+                    const feedbackElement = document.createElement('div');
+                    feedbackElement.classList.add('mt-4', 'p-4', 'rounded-lg', 'hidden');
+                    questionElement.appendChild(feedbackElement);
+                    
+                    quizContainer.appendChild(questionElement);
+                });
+            }
+
+            function checkAnswer(selectedElement, selectedIndex, question) {
+                const questionElement = selectedElement.parentElement;
+                const feedbackElement = questionElement.querySelector('div:last-child');
+                
+                Array.from(questionElement.querySelectorAll('.quiz-option')).forEach(option => {
+                    option.style.pointerEvents = 'none';
+                    if (parseInt(option.dataset.index) === question.correct) {
+                        option.classList.remove('hover:bg-stone-50');
+                        option.classList.add('bg-green-100', 'border-green-400');
+                    } else {
+                        option.classList.remove('hover:bg-stone-50');
+                        option.classList.add('bg-stone-100');
+                    }
+                });
+                
+                if (selectedIndex === question.correct) {
+                    feedbackElement.classList.remove('bg-red-100', 'text-red-700');
+                    feedbackElement.classList.add('bg-green-100', 'text-green-700');
+                    feedbackElement.textContent = `Correto! ${question.explanation}`;
+                } else {
+                    selectedElement.classList.remove('bg-stone-100');
+                    selectedElement.classList.add('bg-red-100', 'border-red-400');
+                    feedbackElement.classList.remove('bg-green-100', 'text-green-700');
+                    feedbackElement.classList.add('bg-red-100', 'text-red-700');
+                    feedbackElement.textContent = `Incorreto. A resposta correta é: "${question.options[question.correct]}". ${question.explanation}`;
+                }
+                
+                feedbackElement.classList.remove('hidden');
+            }
+            
+            // --- CODE EXAMPLES DATA ---
+            const learningCodeBlock = document.getElementById('learning-code-example');
+            const codeBlockContainer = document.getElementById('code-block-container');
+            const visualizationCodeBlock = document.getElementById('visualization-code-example');
+            const visualizationCodeContainer = document.getElementById('visualization-code-container');
+            const tensorflowCodeBlock = document.getElementById('tensorflow-code-example-block');
+            const preprocCodeBlock = document.getElementById('preprocessing-code-example');
+            const preprocCodeContainer = document.getElementById('preprocessing-code-container');
+
+            // --- CONSOLIDATED CODE SNIPPETS OBJECT (FIX for SyntaxError) ---
+            const codeSnippets = {
+                supervisedCode: `
+# Exemplo 1: Classificação com Árvore de Decisão
+# Prevendo se um aluno será "Aprovado" ou "Reprovado" baseado em dados simulados.
+
+# 1. Importar as bibliotecas necessárias
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+import pandas as pd
+
+# 2. Criar um dataset simulado
+dados_alunos = pd.DataFrame({
+    'horas_estudo': [2, 3, 5, 6, 8, 10, 1, 4],
+    'participacao': [1, 2, 3, 4, 5, 5, 1, 2],
+    'resultado': ['Reprovado', 'Reprovado', 'Aprovado', 'Aprovado', 'Aprovado', 'Aprovado', 'Reprovado', 'Reprovado']
+})
+
+X = dados_alunos[['horas_estudo', 'participacao']]
+y = dados_alunos['resultado']
+
+# 3. Dividir os dados para treino e teste
+X_treino, X_teste, y_treino, y_teste = train_test_split(X, y, test_size=0.25, random_state=42)
+
+# 4. Criar e treinar o modelo
+modelo_arvore = DecisionTreeClassifier()
+modelo_arvore.fit(X_treino, y_treino)
+
+# 5. Fazer uma previsão para um novo aluno
+novo_aluno = [[7, 4]]
+previsao = modelo_arvore.predict(novo_aluno)
+
+print(f"A previsão para o novo aluno é: {previsao[0]}")
+            `.trim(),
+
+                unsupervisedCode: `
+# Exemplo 2: Agrupamento com K-Means
+# Segmentando alunos em grupos de desempenho com base em suas notas simuladas, sem rótulos prévios.
+
+# 1. Importar as bibliotecas necessárias
+from sklearn.cluster import KMeans
+import numpy as np
+
+# 2. Criar dados de notas simuladas (Prova 1 e Prova 2)
+# Não há rótulos de grupo, apenas os dados das notas.
+dados_notas = np.array([
+    [7.5, 8.0], [8.2, 8.5], [7.8, 7.9],  # Grupo 1: Alto desempenho
+    [5.0, 5.5], [4.8, 5.2], [5.9, 6.0],  # Grupo 2: Médio desempenho
+    [2.0, 3.0], [2.5, 2.8], [3.1, 3.5]   # Grupo 3: Baixo desempenho
+])
+
+# 3. Criar e treinar o modelo K-Means
+# Vamos pedir para o algoritmo encontrar 3 grupos (clusters)
+modelo_kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+modelo_kmeans.fit(dados_notas)
+
+# 4. Obter as etiquetas (rótulos) dos grupos para cada aluno
+etiquetas_grupos = modelo_kmeans.labels_
+
+# 5. Imprimir os grupos identificados
+print("Etiquetas de grupo para cada aluno (exemplo):")
+print(etiquetas_grupos)
+print("\\nObservação: Os números (0, 1, 2) representam os grupos encontrados pelo algoritmo.")
+            `.trim(),
+            
+                reinforcementCode: `
+# Exemplo 3: Conceito de Aprendizado por Reforço
+# Simulação conceitual de um agente (robô-professor) que aprende a recomendar conteúdo.
+# Isso NÃO é um código executável de RL completo, mas ilustra o conceito.
+
+# Definição de estados, ações e recompensas
+estados = ['Conteúdo_A', 'Conteúdo_B', 'Conteúdo_C']
+acoes = ['Recomendar_A', 'Recomendar_B', 'Recomendar_C']
+
+# Recompensa esperada (hipotética)
+# Se o agente recomenda o conteúdo certo, ele recebe uma recompensa alta.
+def obter_recompensa(estado_atual, acao_tomada):
+    if estado_atual == 'Conteúdo_A' and acao_tomada == 'Recomendar_A':
+        return 10  # Recompensa alta
+    elif estado_atual == 'Conteúdo_B' and acao_tomada == 'Recomendar_B':
+        return 10
+    else:
+        return -1  # Recompensa baixa (ou punição)
+
+# O loop de aprendizado conceitual do agente
+print("Iniciando o processo de aprendizado por reforço...")
+for episodio in range(3): # Simula 3 tentativas de aprendizado
+    estado_inicial = estados[np.random.randint(len(estados))] # Agente escolhe um estado aleatório
+    acao_aleatoria = acoes[np.random.randint(len(acoes))] # Agente escolhe uma ação aleatória
+
+    recompensa = obter_recompensa(estado_inicial, acao_aleatoria)
+    
+    print(f"Episódio {episodio + 1}:")
+    print(f"  Estado inicial: {estado_inicial}")
+    print(f"  Ação tomada: {acao_aleatoria}")
+    print(f"  Recompensa obtida: {recompensa}")
+
+print("\\nO agente aprende a estratégia para maximizar a recompensa ao longo do tempo.")
+            `.trim(),
+
+                cleaningCode: `
+# Exemplo 1: Limpeza de Dados com Pandas
+# Substituindo valores ausentes e removendo duplicatas de um dataset simulado.
+
+# 1. Importar a biblioteca Pandas
+import pandas as pd
+import numpy as np
+
+# 2. Criar um dataset simulado com dados ausentes e duplicados
+dados_sujos = pd.DataFrame({
+    'aluno_id': [1, 2, 3, 4, 1, 5, 6],
+    'nota_final': [8.5, 7.0, np.nan, 9.2, 8.5, 6.8, np.nan],
+    'horas_estudo': [5, 4, 7, 8, 5, 3, 6]
+})
+
+print("Dataset original:\\n", dados_sujos)
+
+# 3. Tratar valores ausentes (np.nan)
+# Vamos preencher os valores ausentes de 'nota_final' com a média da coluna
+media_notas = dados_sujos['nota_final'].mean()
+dados_limpos = dados_sujos.fillna(media_notas)
+
+print("\\nDataset após preencher valores ausentes:\\n", dados_limpos)
+
+# 4. Remover linhas duplicadas
+dados_sem_duplicatas = dados_limpos.drop_duplicates(subset='aluno_id', keep='first')
+
+print("\\nDataset final, sem duplicatas:\\n", dados_sem_duplicatas)
+            `.trim(),
+            
+                normalizationCode: `
+# Exemplo 2: Normalização de Dados com Scikit-learn
+# Normalizando os dados de notas e horas de estudo para uma escala de 0 a 1.
+
+# 1. Importar as bibliotecas necessárias
+from sklearn.preprocessing import MinMaxScaler
+import pandas as pd
+
+# 2. Criar um dataset simulado com colunas em escalas diferentes
+dados_alunos = pd.DataFrame({
+    'horas_estudo': [1, 2, 5, 8, 10],
+    'nota_final': [60, 75, 80, 95, 100]
+})
+
+print("Dataset original:\\n", dados_alunos)
+
+# 3. Instanciar o MinMaxScaler
+scaler = MinMaxScaler()
+
+# 4. Aplicar a normalização
+dados_normalizados = scaler.fit_transform(dados_alunos)
+dados_normalizados = pd.DataFrame(dados_normalizados, columns=dados_alunos.columns)
+
+print("\\nDataset normalizado (escala 0-1):\\n", dados_normalizados)
+            `.trim(),
+
+                transformationCode: `
+# Exemplo 3: Redução de Dimensionalidade com PCA
+# Reduzindo o número de features em um dataset simulado com muitas colunas.
+
+# 1. Importar as bibliotecas necessárias
+from sklearn.decomposition import PCA
+import pandas as pd
+import numpy as np
+
+# 2. Criar um dataset com 5 features
+np.random.seed(42)
+dados = pd.DataFrame(np.random.rand(10, 5), columns=[f'feature_{i}' for i in range(5)])
+
+print("Dataset original (5 features):\\n", dados.head())
+
+# 3. Instanciar o PCA
+# Vamos reduzir para apenas 2 componentes principais
+pca = PCA(n_components=2)
+
+# 4. Aplicar a redução de dimensionalidade
+dados_reduzidos = pca.fit_transform(dados)
+dados_reduzidos = pd.DataFrame(dados_reduzidos, columns=['componente_1', 'componente_2'])
+
+print("\\nDataset após redução de dimensionalidade (2 componentes):\\n", dados_reduzidos.head())
+            `.trim(),
+            
+                edaScatterCode: `
+# Exemplo Prático: EDA com Gráfico de Dispersão (Matplotlib)
+# Analisando a correlação entre duas variáveis simuladas.
+
+# 1. Importar bibliotecas
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+# 2. Criar dados simulados (simulando horas de estudo vs. nota)
+np.random.seed(42)
+horas = np.random.randint(1, 10, 50)
+nota = 5 + horas * 0.5 + np.random.normal(0, 1.5, 50)
+dados = pd.DataFrame({'Horas_Estudo': horas, 'Nota_Final': nota})
+
+# 3. Criar o gráfico de dispersão
+plt.figure(figsize=(8, 5))
+plt.scatter(dados['Horas_Estudo'], dados['Nota_Final'], alpha=0.7, color='teal')
+plt.title('Correlação entre Horas de Estudo e Nota Final', fontsize=14)
+plt.xlabel('Horas de Estudo', fontsize=12)
+plt.ylabel('Nota Final', fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.show()
+
+print("Observação: O gráfico gerado (Scatter Plot) é uma técnica crucial de EDA para visualizar se existe uma correlação (positiva neste caso) entre as variáveis, antes de aplicar um modelo de Regressão.")
+            `.trim(),
+
+                classificationCode: `
+# Exemplo 1: Classificação com K-Vizinhos Mais Próximos (KNN)
+# Este código classifica flores do dataset Iris com base em suas características.
+
+# 1. Instalar a biblioteca Scikit-learn (já vem por padrão no Colab)
+# !pip install scikit-learn
+
+# 2. Importar as bibliotecas necessárias
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+# 3. Carregar o dataset Iris (conjunto de dados de exemplo)
+iris = load_iris()
+X = iris.data  # Características das flores
+y = iris.target # Rótulos (classes das flores: Setosa, Versicolor, Virginica)
+
+# 4. Dividir os dados em conjuntos de treino e teste
+# O modelo será treinado com 80% dos dados e testado com 20%
+X_treino, X_teste, y_treino, y_teste = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 5. Criar e treinar o modelo
+# Usamos o KNN com 3 vizinhos mais próximos
+modelo_knn = KNeighborsClassifier(n_neighbors=3)
+modelo_knn.fit(X_treino, y_treino)
+
+# 6. Fazer previsões no conjunto de teste
+previsoes = modelo_knn.predict(X_teste)
+
+# 7. Avaliar o desempenho do modelo
+acuracia = accuracy_score(y_teste, previsoes)
+
+print(f"Acurácia do modelo: {acuracia:.2f}")
+
+# 8. Fazer uma previsão com uma nova flor (exemplo)
+# Característica: [comprimento da sépala, largura da sépala, comprimento da pétala, largura da pétala]
+nova_flor = [[5.1, 3.5, 1.4, 0.2]]
+previsao_nova_flor = modelo_knn.predict(nova_flor)
+
+print(f"Previsão para a nova flor: {iris.target_names[previsao_nova_flor[0]]}")
+            `.trim(),
+
+                regressionCode: `
+# Exemplo 2: Regressão Linear Simples
+# Este código prevê o valor de uma variável a partir de outra.
+
+# 1. Importar as bibliotecas necessárias
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import matplotlib.pyplot as plt # Para visualização
+
+# 2. Criar dados de exemplo (tamanho de uma casa e seu preço)
+tamanho_casa = np.array([50, 60, 70, 80, 90, 100, 110, 120]).reshape(-1, 1) # Característica (X)
+preco_casa = np.array([200, 250, 300, 350, 400, 450, 500, 550]) # Rótulo (y)
+
+# 3. Criar e treinar o modelo de regressão linear
+modelo_regressao = LinearRegression()
+modelo_regressao.fit(tamanho_casa, preco_casa)
+
+# 4. Fazer uma previsão para um novo tamanho de casa
+novo_tamanho = np.array([[130]])
+preco_previsto = modelo_regressao.predict(novo_tamanho)
+
+print(f"Preço previsto para uma casa de 130m²: R$ {preco_previsto[0]:.2f} mil")
+
+# 5. Visualizar o resultado (opcional, mas muito útil)
+plt.scatter(tamanho_casa, preco_casa, color='blue', label='Dados Originais')
+plt.plot(tamanho_casa, modelo_regressao.predict(tamanho_casa), color='red', label='Linha de Regressão')
+plt.scatter(novo_tamanho, preco_previsto, color='green', label='Nova Previsão', zorder=5)
+plt.title('Previsão de Preço de Casas')
+plt.xlabel('Tamanho da Casa (m²)')
+plt.ylabel('Preço (milhares de R$)')
+plt.legend()
+plt.grid(True)
+plt.show()
+            `.trim(),
+
+                tensorflowRegressionCode: `
+# Tutorial Básico: Regressão Linear com TensorFlow (Deep Learning)
+# Objetivo: Prever notas (y) com base nas horas de estudo (x).
+
+# 1. Instalar a biblioteca TensorFlow (já vem por padrão no Colab)
+# !pip install tensorflow
+
+# 2. Importar as bibliotecas necessárias
+import tensorflow as tf
+import numpy as np
+
+# 3. Preparação dos Dados (Simulados)
+# x_train: Dados de entrada (Horas de estudo)
+# y_train: Dados de saída (Notas, onde Nota ≈ 2 * Horas)
+x_train = np.array([1.0, 2.0, 3.0, 4.0, 5.0], dtype=float)
+y_train = np.array([2.0, 4.0, 6.0, 8.0, 10.0], dtype=float)
+
+# 4. Construção do Modelo (Rede Neural Sequencial Simples)
+# tf.keras.Sequential: Define um modelo como uma pilha de camadas.
+# tf.keras.layers.Dense(units=1): Uma camada densa com 1 neurônio (saída).
+# input_shape=[1]: Define a forma da entrada (apenas 1 característica, as horas de estudo).
+model = tf.keras.Sequential([tf.keras.layers.Dense(units=1, input_shape=[1])])
+
+# 5. Compilação do Modelo
+# optimizer='sgd': Stochastic Gradient Descent (Otimizador comum para regressão).
+# loss='mean_squared_error': Função de perda para problemas de regressão.
+model.compile(optimizer='sgd', loss='mean_squared_error')
+
+# 6. Treinamento do Modelo
+# epochs=500: O modelo irá iterar 500 vezes sobre todo o conjunto de dados.
+print("Iniciando treinamento...")
+model.fit(x_train, y_train, epochs=500, verbose=0)
+print("Treinamento concluído.")
+
+# 7. Fazer Previsões
+nova_entrada = [7.0]
+previsao = model.predict(nova_entrada)
+
+print(f"\\nSe o aluno estudar {nova_entrada[0]} horas, a nota prevista é: {previsao[0][0]:.2f}")
+`.trim(),
+            };
+            // --- END CONSOLIDATED CODE SNIPPETS OBJECT ---
+
+            window.showCode = function(type) {
+                let code = '';
+                if (type === 'supervised') {
+                    code = codeSnippets.supervisedCode;
+                } else if (type === 'unsupervised') {
+                    code = codeSnippets.unsupervisedCode;
+                } else if (type === 'reinforcement') {
+                    code = codeSnippets.reinforcementCode;
+                }
+                
+                learningCodeBlock.textContent = code;
+                codeBlockContainer.classList.remove('hidden');
+                codeBlockContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
+            window.showPreprocessingCode = function(type) {
+                let code = '';
+                if (type === 'cleaning') {
+                    code = codeSnippets.cleaningCode;
+                } else if (type === 'normalization') {
+                    code = codeSnippets.normalizationCode;
+                } else if (type === 'transformation') {
+                    code = codeSnippets.transformationCode;
+                }
+                preprocCodeBlock.textContent = code;
+                preprocCodeContainer.classList.remove('hidden');
+                preprocCodeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+            
+            window.showVisualizationCode = function(type) {
+                if (type === 'eda_scatter') {
+                    visualizationCodeBlock.textContent = codeSnippets.edaScatterCode;
+                }
+                visualizationCodeContainer.classList.remove('hidden');
+                visualizationCodeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
+
+            const codeBlock = document.getElementById('code-example-block');
+            const classificationBtn = document.getElementById('classification-btn');
+            const regressionBtn = document.getElementById('regression-btn');
+
+            classificationBtn.addEventListener('click', () => {
+                codeBlock.textContent = codeSnippets.classificationCode;
+                classificationBtn.classList.add('bg-teal-700', 'ring-2', 'ring-teal-300');
+                regressionBtn.classList.remove('bg-orange-700', 'ring-2', 'ring-orange-300');
+            });
+
+            regressionBtn.addEventListener('click', () => {
+                codeBlock.textContent = codeSnippets.regressionCode;
+                regressionBtn.classList.add('bg-orange-700', 'ring-2', 'ring-orange-300');
+                classificationBtn.classList.remove('bg-teal-700', 'ring-2', 'ring-teal-300');
+            });
+
+            const tensorflowRegressionBtn = document.getElementById('tensorflow-regression-btn');
+            const tensorflowCodeExampleBlock = document.getElementById('tensorflow-code-example-block');
+            
+            tensorflowRegressionBtn.addEventListener('click', () => {
+                tensorflowCodeExampleBlock.textContent = codeSnippets.tensorflowRegressionCode;
+                tensorflowRegressionBtn.classList.add('bg-indigo-700', 'ring-2', 'ring-indigo-300');
+            });
+
+
+            function initializeCharts() {
+                const learningTypesChartCtx = document.getElementById('learningTypesChart');
+                if (learningTypesChartCtx) {
+                    new Chart(learningTypesChartCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['Supervisionado', 'Não Supervisionado', 'Por Reforço'],
+                            datasets: [{
+                                label: 'Foco Principal',
+                                data: [90, 75, 85],
+                                backgroundColor: [
+                                    'rgba(13, 148, 136, 0.6)',
+                                    'rgba(234, 88, 12, 0.6)',
+                                    'rgba(2, 132, 199, 0.6)'
+                                ],
+                                borderColor: [
+                                    'rgba(13, 148, 136, 1)',
+                                    'rgba(234, 88, 12, 1)',
+                                    'rgba(2, 132, 199, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Comparativo de Abordagens de Aprendizado',
+                                    font: { size: 16 },
+                                    color: '#44403c'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.dataset.label || '';
+                                            const value = context.parsed.y;
+                                            let focus = '';
+                                            if (context.dataIndex === 0) focus = 'Foco: Previsão';
+                                            if (context.dataIndex === 1) focus = 'Foco: Descoberta de Padrões';
+                                            if (context.dataIndex === 2) focus = 'Foco: Tomada de Decisão';
+                                            return `${label}: ${focus}`;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            initializeCharts();
+            buildQuiz();
+        });
+    </script>
+</body>
+</html>
